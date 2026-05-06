@@ -55,8 +55,41 @@ const saveTasks = (tasks) => {
 
 // 1. GET /tasks: Returns a list of all tasks.
 app.get('/tasks', (req, res) => {
-    const tasks = getTasks();
-    res.json(tasks);
+    let tasks = getTasks();
+    
+    // Filter
+    if (req.query.completed !== undefined) {
+        const isCompleted = req.query.completed === 'true';
+        tasks = tasks.filter(t => t.completed === isCompleted);
+    }
+    
+    // Search
+    const search = req.query.search;
+    if (search) {
+        const lowerCaseSearch = search.toLowerCase();
+        tasks = tasks.filter(t => 
+            t.title.toLowerCase().includes(lowerCaseSearch) || 
+            (t.description && t.description.toLowerCase().includes(lowerCaseSearch))
+        );
+    }
+    
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    
+    const paginatedTasks = tasks.slice(startIndex, endIndex);
+    
+    res.json({
+        data: paginatedTasks,
+        meta: {
+            totalItems: tasks.length,
+            currentPage: page,
+            totalPages: Math.ceil(tasks.length / limit),
+            itemsPerPage: limit
+        }
+    });
 });
 
 // 2. GET /tasks/:id: Returns a single task by ID.

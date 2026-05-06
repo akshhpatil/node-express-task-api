@@ -1,6 +1,9 @@
 const API_URL = 'http://localhost:3000/tasks';
 let tasks = [];
 let currentFilter = 'all';
+let currentPage = 1;
+const limit = 10;
+let searchQuery = '';
 
 // DOM Elements
 const taskForm = document.getElementById('task-form');
@@ -8,6 +11,11 @@ const titleInput = document.getElementById('task-title');
 const descInput = document.getElementById('task-desc');
 const tasksList = document.getElementById('tasks-list');
 const filterBtns = document.querySelectorAll('.filter-btn');
+const searchInput = document.getElementById('search-input');
+const prevPageBtn = document.getElementById('prev-page');
+const nextPageBtn = document.getElementById('next-page');
+const pageInfo = document.getElementById('page-info');
+const paginationControls = document.getElementById('pagination-controls');
 
 // Initialize Icons
 lucide.createIcons();
@@ -15,14 +23,63 @@ lucide.createIcons();
 // Fetch Tasks
 async function fetchTasks() {
     try {
-        const res = await fetch(API_URL);
-        tasks = await res.json();
+        let url = `${API_URL}?page=${currentPage}&limit=${limit}`;
+        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+        if (currentFilter === 'active') url += '&completed=false';
+        if (currentFilter === 'completed') url += '&completed=true';
+        
+        const res = await fetch(url);
+        const response = await res.json();
+        
+        // Handle new response shape { data, meta }
+        tasks = response.data || response;
+        const meta = response.meta;
+        
         renderTasks();
+        
+        if (meta) {
+            updatePagination(meta);
+        }
     } catch (error) {
         console.error('Error fetching tasks:', error);
         tasksList.innerHTML = '<div class="empty-state">Failed to load tasks. Is the server running?</div>';
     }
 }
+
+// Update Pagination UI
+function updatePagination(meta) {
+    // Only show pagination if there's more than 1 page or we are not on page 1
+    paginationControls.style.display = meta.totalPages > 1 || currentPage > 1 ? 'flex' : 'none';
+    pageInfo.textContent = `Page ${meta.currentPage} of ${Math.max(1, meta.totalPages)}`;
+    prevPageBtn.disabled = meta.currentPage <= 1;
+    nextPageBtn.disabled = meta.currentPage >= meta.totalPages;
+}
+
+// Search Logic (Debounced)
+let searchTimeout;
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchQuery = e.target.value.trim();
+            currentPage = 1; // Reset to page 1 on new search
+            fetchTasks();
+        }, 300);
+    });
+}
+
+// Pagination Event Listeners
+prevPageBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        fetchTasks();
+    }
+});
+
+nextPageBtn.addEventListener('click', () => {
+    currentPage++;
+    fetchTasks();
+});
 
 // Add Task
 taskForm.addEventListener('submit', async (e) => {
@@ -53,7 +110,8 @@ taskForm.addEventListener('submit', async (e) => {
         
         titleInput.value = '';
         descInput.value = '';
-        await fetchTasks();
+        // Go back to page 1 to see the new task (if sorting defaults to newest, though here it appends to end. Just reloading for simplicity).
+        fetchTasks();
     } catch (error) {
         alert(error.message);
     } finally {
@@ -83,6 +141,12 @@ window.deleteTask = async function(id) {
     
     try {
         await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        
+        // Handle Edge case: Deleting last item on page > 1 should go to previous page
+        if (tasks.length === 1 && currentPage > 1) {
+            currentPage--;
+        }
+        
         await fetchTasks();
     } catch (error) {
         console.error('Error deleting task:', error);
@@ -95,7 +159,8 @@ filterBtns.forEach(btn => {
         filterBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFilter = btn.dataset.filter;
-        renderTasks();
+        currentPage = 1; // Reset to page 1 on filter change
+        fetchTasks();
     });
 });
 
@@ -103,16 +168,16 @@ filterBtns.forEach(btn => {
 function renderTasks() {
     tasksList.innerHTML = '';
     
-    let filteredTasks = tasks;
-    if (currentFilter === 'active') filteredTasks = tasks.filter(t => !t.completed);
-    if (currentFilter === 'completed') filteredTasks = tasks.filter(t => t.completed);
-    
-    if (filteredTasks.length === 0) {
-        tasksList.innerHTML = `<div class="empty-state">No ${currentFilter !== 'all' ? currentFilter : ''} tasks found.</div>`;
+    if (tasks.length === 0) {
+        let msg = 'No tasks found.';
+        if (searchQuery) msg = `No results for "${searchQuery}".`;
+        else if (currentFilter !== 'all') msg = `No ${currentFilter} tasks.`;
+        
+        tasksList.innerHTML = `<div class="empty-state">${msg}</div>`;
         return;
     }
     
-    filteredTasks.forEach((task, index) => {
+    tasks.forEach((task, index) => {
         const card = document.createElement('div');
         card.className = `task-card ${task.completed ? 'completed' : ''}`;
         

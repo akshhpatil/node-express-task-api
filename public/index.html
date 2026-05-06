@@ -26,6 +26,10 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="top-header">
+                <div class="search-bar">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="search-input" placeholder="Search tasks...">
+                </div>
                 <div class="header-actions">
                     <button class="btn-primary" onclick="document.getElementById('task-title').focus()">
                         <i data-lucide="plus"></i> New Task
@@ -59,6 +63,13 @@
                 <div class="tasks-container" id="tasks-list">
                     <!-- Tasks will be injected here via JS -->
                     <div class="loading">Loading tasks...</div>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div class="pagination" id="pagination-controls" style="display: none;">
+                    <button id="prev-page" class="icon-btn" disabled><i data-lucide="chevron-left"></i></button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button id="next-page" class="icon-btn" disabled><i data-lucide="chevron-right"></i></button>
                 </div>
             </div>
         </main>
