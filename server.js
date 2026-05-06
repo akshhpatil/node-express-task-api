@@ -2,10 +2,24 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const Joi = require('joi');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data', 'tasks.json');
+
+// Joi Validation Schemas
+const taskSchema = Joi.object({
+    title: Joi.string().min(3).required(),
+    description: Joi.string().allow('').optional(),
+    completed: Joi.boolean().optional()
+});
+
+const taskUpdateSchema = Joi.object({
+    title: Joi.string().min(3).optional(),
+    description: Joi.string().allow('').optional(),
+    completed: Joi.boolean().optional()
+});
 
 // Middleware
 app.use(cors());
@@ -60,11 +74,11 @@ app.get('/tasks/:id', (req, res) => {
 
 // 3. POST /tasks: Creates a new task.
 app.post('/tasks', (req, res) => {
-    const { title, description, completed } = req.body;
+    // Validate request body against Joi schema
+    const { error, value } = taskSchema.validate(req.body);
     
-    // Validation
-    if (!title || typeof title !== 'string') {
-        return res.status(400).json({ error: 'Title is required and must be a string' });
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
     }
     
     const tasks = getTasks();
@@ -74,9 +88,9 @@ app.post('/tasks', (req, res) => {
     
     const newTask = {
         id: newId,
-        title,
-        description: description || '',
-        completed: typeof completed === 'boolean' ? completed : false
+        title: value.title,
+        description: value.description || '',
+        completed: value.completed || false
     };
     
     tasks.push(newTask);
@@ -88,7 +102,12 @@ app.post('/tasks', (req, res) => {
 // 4. PUT /tasks/:id: Updates an existing task.
 app.put('/tasks/:id', (req, res) => {
     const taskId = parseInt(req.params.id);
-    const { title, description, completed } = req.body;
+    
+    // Validate request body against Joi schema
+    const { error, value } = taskUpdateSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
     
     const tasks = getTasks();
     const taskIndex = tasks.findIndex(t => t.id === taskId);
@@ -98,9 +117,9 @@ app.put('/tasks/:id', (req, res) => {
     }
     
     // Update task properties if provided
-    if (title !== undefined) tasks[taskIndex].title = title;
-    if (description !== undefined) tasks[taskIndex].description = description;
-    if (completed !== undefined) tasks[taskIndex].completed = completed;
+    if (value.title !== undefined) tasks[taskIndex].title = value.title;
+    if (value.description !== undefined) tasks[taskIndex].description = value.description;
+    if (value.completed !== undefined) tasks[taskIndex].completed = value.completed;
     
     saveTasks(tasks);
     

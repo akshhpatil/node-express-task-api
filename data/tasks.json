@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": 2,
+    "title": "Design new database schema",
+    "description": "Create ERD for the new analytics features",
+    "completed": false
+  },
+  {
+    "id": 3,
+    "title": "Fix authentication bug",
+    "description": "Users are being logged out randomly on mobile",
+    "completed": true
+  },
+  {
+    "id": 4,
+    "title": "Write API documentation",
+    "description": "Document all task endpoints using Swagger",
+    "completed": false
+  },
+  {
+    "id": 5,
+    "title": "Prepare presentation slides",
+    "description": "For the sprint review meeting tomorrow",
+    "completed": false
+  },
+  {
+    "id": 6,
+    "title": "Review PR #42",
+    "description": "Check the new pagination logic before merging",
+    "completed": true
+  }
+]
