@@ -1,61 +1,80 @@
-# Node.js Express Task API
+# 🚀 Taskflow - Full-Stack Task Management API
 
-This is a simple backend application that manages a list of tasks, demonstrating basic CRUD (Create, Read, Update, Delete) operations using Node.js and Express.js.
+A robust, feature-rich task management REST API built with Node.js and Express, coupled with a highly polished, modern vanilla JS frontend dashboard.
 
-This project was built as a demo task for a Full Stack Engineer assessment.
+This project was engineered to demonstrate clean architecture, robust data validation, and modern UI/UX principles for a Full Stack Engineer assessment.
 
-## Features
-- **RESTful API**: Clean API endpoints for interacting with tasks.
-- **In-Memory/File Data Storage**: Uses a lightweight local `tasks.json` file for data persistence.
-- **Input Validation**: Ensures required fields like `title` are present during creation.
-- **Built-in UI Tester**: Includes a lightweight, vanilla HTML/JS frontend to test the API directly without needing external tools.
+## ✨ Key Technical Highlights
 
-## Prerequisites
-- [Node.js](https://nodejs.org/) installed (v14 or higher recommended).
+### Backend Engineering (Node.js & Express)
+- **Advanced Querying**: Fully implemented server-side **Pagination**, **Search**, and **Filtering** logic to simulate real-world database queries.
+- **Robust Validation**: Integrated **Joi** schema validation for all incoming POST and PUT requests to ensure data integrity, return descriptive error messages, and prevent malformed data.
+- **Data Persistence**: Built a lightweight data persistence layer using `fs` to read/write JSON, ensuring data isn't lost on server restart while adhering to zero-database assessment requirements.
+- **RESTful Design**: Adheres strictly to REST API conventions (`GET`, `POST`, `PUT`, `DELETE`) with precise HTTP status codes (200, 201, 204, 400, 404).
 
-## Setup & Installation
+### Frontend UI/UX (Vanilla HTML/CSS/JS)
+- **Modern SaaS Dashboard**: A responsive, full-screen dashboard layout avoiding generic, out-of-the-box boilerplate designs.
+- **Premium Aesthetics**: Utilizes advanced CSS techniques including glassmorphism (backdrop filters), custom animated background blobs, and sleek micro-animations.
+- **Asynchronous Data Handling**: Fully reactive frontend utilizing the `Fetch API` for seamless, page-reload-free interactions.
+- **Optimized UX**: Features debounced live searching, dynamic pagination controls, and error boundaries.
 
-1. Clone the repository:
+---
+
+## 🛠️ Setup & Installation
+
+**Prerequisites:** [Node.js](https://nodejs.org/) installed (v14+ recommended).
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/akshhpatil/node-express-task-api.git
-   ```
-2. Navigate into the project directory:
-   ```bash
    cd node-express-task-api
    ```
-3. Install dependencies:
+
+2. **Install dependencies:**
    ```bash
    npm install
    ```
+   *(Dependencies include `express`, `cors`, `joi`, and `nodemon` for local development).*
 
-## Running the Application
+3. **Start the server:**
+   ```bash
+   npm start
+   ```
 
-To start the server, run the following command:
-```bash
-node server.js
+---
+
+## 💻 Live Demonstration
+
+The easiest and best way to review this project is through the integrated frontend!
+
+Once the server is running, navigate to:
+**👉 http://localhost:3000**
+
+You can immediately test adding tasks, searching, toggling completion, deleting, and paginating through results.
+
+---
+
+## 🔗 API Documentation
+
+If you prefer testing via Postman or cURL, the endpoints are fully documented below:
+
+| Method | Endpoint | Query Parameters | Description |
+|---|---|---|---|
+| GET | `/tasks` | `?page=1&limit=10`<br>`?search=text`<br>`?completed=true` | Fetch tasks (supports pagination, search, and filtering) |
+| GET | `/tasks/:id` | none | Fetch a single task by ID |
+| POST | `/tasks` | none | Create a task. Body: `{"title": "string (min 3)", "description": "string"}` |
+| PUT | `/tasks/:id` | none | Update a task. Body accepts partial updates. |
+| DELETE | `/tasks/:id` | none | Delete a task. |
+
+**Example Search & Pagination Request:**
+```http
+GET http://localhost:3000/tasks?search=demo&page=1&limit=5&completed=false
 ```
 
-The server will start on `http://localhost:3000`.
+---
 
-## Testing the API
+## 🏗️ Architectural Decisions
 
-### Method 1: Using the Built-in Frontend (Recommended)
-Once the server is running, simply open your browser and navigate to:
-**http://localhost:3000**
-This will load a simple web interface built to test all CRUD operations interactively.
-
-### Method 2: Using API Endpoints directly (Postman / cURL)
-
-| Method | Endpoint | Description | Request Body (JSON) |
-|---|---|---|---|
-| GET | `/tasks` | Get all tasks | none |
-| GET | `/tasks/:id` | Get a single task by ID | none |
-| POST | `/tasks` | Create a new task | `{"title": "Task 1", "description": "Desc"}` |
-| PUT | `/tasks/:id` | Update an existing task | `{"completed": true}` (or `title`/`description`) |
-| DELETE | `/tasks/:id` | Delete a task | none |
-
-## Design Decisions
-- **Data Storage**: Instead of just using an in-memory array that wipes upon server restart, I chose to implement file-system storage (`data/tasks.json`). This satisfies the "lightweight" requirement but adds a touch of robustness so data persists.
-- **Vanilla Frontend**: Included an `index.html` frontend within the `public` folder to make it trivially easy for the reviewer to test the app without having to import Postman collections.
-- **Validation**: Added basic validation on the `POST` route to ensure empty or invalid tasks cannot be created.
-- **Frameworks**: Kept it strictly to Express and standard Node modules (`fs`, `path`) to keep the footprint as small as possible per requirements.
+- **Why Joi?** Manual `if/else` validation scales poorly. Joi provides a declarative, strictly typed schema that instantly hardens the API against bad actors.
+- **Why Vanilla JS for the Frontend?** To demonstrate a deep, fundamental understanding of the DOM, Event Loop, and Fetch API without hiding behind abstractions like React or Vue for a simple demo.
+- **Why Server-Side Pagination?** While client-side pagination works for small arrays, true production APIs must paginate at the server layer to minimize bandwidth overhead and memory footprint. This project implements production-ready server-side slicing.
