@@ -15,6 +15,9 @@ app.use(express.static('public')); // For testing the API with the provided fron
 // Helper function to read tasks from file
 const getTasks = () => {
     try {
+        if (!fs.existsSync(DATA_FILE)) {
+            return [];
+        }
         const data = fs.readFileSync(DATA_FILE, 'utf8');
         return JSON.parse(data);
     } catch (error) {
@@ -26,6 +29,10 @@ const getTasks = () => {
 // Helper function to save tasks to file
 const saveTasks = (tasks) => {
     try {
+        const dir = path.dirname(DATA_FILE);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
         fs.writeFileSync(DATA_FILE, JSON.stringify(tasks, null, 2), 'utf8');
     } catch (error) {
         console.error("Error saving tasks:", error);
