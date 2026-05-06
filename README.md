@@ -2,7 +2,7 @@
 
 This is a simple backend application that manages a list of tasks, demonstrating basic CRUD (Create, Read, Update, Delete) operations using Node.js and Express.js.
 
-This project was built as a demo task for the Full Stack Engineer assessment at Zeonix Global Pvt. Ltd.
+This project was built as a demo task for a Full Stack Engineer assessment.
 
 ## Features
 - **RESTful API**: Clean API endpoints for interacting with tasks.
