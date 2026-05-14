@@ -79,11 +79,3 @@ GET http://localhost:3000/tasks?search=demo&page=1&limit=5&completed=false
 - **Why Vanilla JS for the Frontend?** To demonstrate a deep, fundamental understanding of the DOM, Event Loop, and Fetch API without hiding behind abstractions like React or Vue for a simple demo.
 - **Why Server-Side Pagination?** While client-side pagination works for small arrays, true production APIs must paginate at the server layer to minimize bandwidth overhead and memory footprint. This project implements production-ready server-side slicing.
 
-
-Docker
-Docker Compose
-Nginx
-Jenkins pipelines
-AWS EC2
-GitHub Actions
-Kubernetes basics
